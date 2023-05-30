@@ -62,19 +62,19 @@ export class UserService {
       const users = await this.prisma.user.findMany();
       return users;
     } catch (error) {
-      throw new BadRequestException("erro ao solicitar usuarios")
+      throw new BadRequestException({status:"erro ao solicitar usuarios",erro:error.message})
     }
   
   }
 
   async findOne(id: string) {
     try {
-      const user = await this.prisma.user.findUnique({where:{
+      const user = await this.prisma.user.findFirst({where:{
         id: id
       }});
       return user;
     } catch (error) {
-      throw new BadRequestException("erro ao solicitar usuarios")
+      throw new BadRequestException({status:"erro ao solicitar usuario",erro:error.message})
     }
   }
 
@@ -104,13 +104,24 @@ export class UserService {
   
       return user;
     } catch (error) {
-      throw new BadRequestException({status:"erro ao salvar usuario",erro:error.message})
+      throw new BadRequestException({status:"erro ao atualizar usuario",erro:error.message})
     }
      }
 
-  remove(id: number) {
+ async  remove(id: string) {
    
+   try {
+    const user = await this.prisma.user.findFirst({where:{
+      id:id
+    }})
+    if(user){
+      const status = await this.prisma.user.delete({where:{id:id}});
+      return {status:"usuario deletado!"}
+    }
+    throw new BadRequestException("Usuario inexistente")
+   } catch (error) {
+    throw new BadRequestException({status:"erro ao deletar usuario",erro:error.message})
+   }
    
-    return `This action removes a #${id} user`;
   }
 }
