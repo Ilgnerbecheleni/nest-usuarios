@@ -59,7 +59,12 @@ export class UserService {
 
   async findAll() {
     try {
-      const users = await this.prisma.user.findMany();
+      const users = await this.prisma.user.findMany({select:{
+        id:true,
+        name:true,
+        email:true,
+        nickName:true
+      }});
       return users;
     } catch (error) {
       throw new BadRequestException({status:"erro ao solicitar usuarios",erro:error.message})
@@ -69,16 +74,29 @@ export class UserService {
 
   async findOne(id: string) {
     try {
+     
       const user = await this.prisma.user.findFirst({where:{
-        id: id
+       id:id
+      },select:{
+        id:true,
+        name:true,
+        email:true,
+        nickName:true
       }});
-      return user;
+  if(user){
+    return user;
+  }
+  else{
+    throw new BadRequestException("Não encontrado!")
+  }
+      
+     
     } catch (error) {
       throw new BadRequestException({status:"erro ao solicitar usuario",erro:error.message})
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
    
     try {
       const {name,password,nickName,role,email}= updateUserDto;

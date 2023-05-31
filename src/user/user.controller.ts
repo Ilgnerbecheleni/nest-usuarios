@@ -24,15 +24,17 @@ export class UserController {
   findAll() {
     return this.userService.findAll();
   }
-
+  @UseGuards(AuthGuard,RolesGuard)
+  @Roles(Role.Admin)
   @Get(':id')
   findOne(@Param('id') id: string) {
+    console.log(id)
     return this.userService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../Roles/role.enum';
 import { ROLES_KEY } from '../decorators/roles.decorator';
@@ -13,13 +13,19 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (!requiredRoles) {
 
+    if (!requiredRoles) {
       return true;
     }
-    console.log(requiredRoles)
+
     const { user } = context.switchToHttp().getRequest();
-    console.log(user)
+    const userIdFromToken = user.id;
+    const userIdFromParams = context.switchToHttp().getRequest().params.userId;
+
+    if (userIdFromToken !== userIdFromParams) {
+      throw new UnauthorizedException('You are not authorized to access this resource.');
+    }
+
     return requiredRoles.some((role) => user.role?.includes(role));
   }
 }
